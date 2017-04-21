@@ -19,6 +19,9 @@ using namespace std;
 
 #define DIR_DB_S "db/s"
 
+// Prefix HDR_: headers used in the preamble of a story file.
+#define HDR_TITLE "title"
+
 int error_code(int code, const char *msg, ...){
 	cerr << msg;
 
@@ -64,18 +67,13 @@ void write_story(string fname){
 			headers[sm[1]] = sm[2];
 	}
 
-	for(auto x : headers){
-		// FIXME debug
-		cout << "<!-- " << x.first << ": " << x.second << " -->" << endl;
-	}
-
 	// Write out the story.
 	cout << "<!-- " << fname << ": " << time << " -->" << endl;
 	cout << "<div class=story>" << endl;
 	cout << "<span class=dateline>" << time << "</span>" <<endl;
 
 	try {
-		cout << "<h2>" << headers.at("title") << "</h2>" << endl;
+		cout << "<h2>" << headers.at(HDR_TITLE) << "</h2>" << endl;
 	} catch(...){
 		cout << "<!-- untitled -->" << endl;
 	}

@@ -1,5 +1,8 @@
 all: db bin/cat_story
 
+clean:
+	rm -r bin
+
 GCC=g++ -std=c++11 -s
 
 db:
