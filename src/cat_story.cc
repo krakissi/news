@@ -17,8 +17,11 @@
 
 using namespace std;
 
-#define DIR_DB_S "db/s"
+#define DIR_DB_BASE "db/"
 #define MAX_PAGE_COUNT 10
+#define DIR_DB_DEFAULT "s"
+
+char dir_db[256] = DIR_DB_BASE DIR_DB_DEFAULT;
 
 // Prefix HDR_: headers used in the preamble of a story file.
 #define HDR_TITLE "title"
@@ -62,7 +65,7 @@ void write_story(string fname){
 	smatch sm;
 	map<string, string> headers;
 
-	string path = ((DIR_DB_S "/") + fname);
+	string path = dir_db + ("/" + fname);
 	ifstream in(path);
 	string buffer;
 
@@ -123,7 +126,14 @@ void query_parse(map<string, string> &query){
 }
 
 int main(int argc, char **argv){
-	DIR *dbs = opendir(DIR_DB_S);
+	// First argument is an optional alternative DB directory.
+	if(argc >= 2){
+		strcpy(dir_db, DIR_DB_BASE);
+		strcat(dir_db, argv[1]);
+	}
+
+	string dbdir = (dir_db);
+	DIR *dbs = opendir(dbdir.c_str());
 	string b;
 
 	list<string> files;
@@ -167,7 +177,7 @@ int main(int argc, char **argv){
 	}
 
 	if(!dbs)
-		return error_code(1, "Could not open " DIR_DB_S "\n");
+		return error_code(1, "Could not open " DIR_DB_BASE "\n");
 
 	int count = 0;
 	struct dirent *entry;
