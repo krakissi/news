@@ -11,7 +11,9 @@
 #include <regex>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 
 #include <time.h>
 
@@ -60,12 +62,26 @@ string format_time(string fname){
 	return result;
 }
 
-void write_story(string fname){
+bool write_story(string fname){
 	static regex regex_key("^\\s*([^\\s=]*)\\s*=\\s*(.*)$");
 	smatch sm;
 	map<string, string> headers;
 
 	string path = dir_db + ("/" + fname);
+
+	// Determine whether this is a valid story file.
+	{
+		struct stat sb;
+
+		// File doesn't exist or we don't have access to it.
+		if(stat(path.c_str(), &sb))
+			return false;
+
+		// Don't read directories as story files.
+		if(S_ISDIR(sb.st_mode))
+			return false;
+	}
+
 	ifstream in(path);
 	string buffer;
 
@@ -100,6 +116,8 @@ void write_story(string fname){
 		cout << "\t" <<  buffer << endl;
 	}
 	cout << "</div>" << endl;
+
+	return true;
 }
 
 void query_parse(map<string, string> &query){
@@ -196,6 +214,8 @@ int main(int argc, char **argv){
 	cout << endl;
 
 	for(auto str : files){
+
+
 		// If this is a single post lookup, skip files that don't match the name.
 		if(single_post && (post_id != str))
 			continue;
@@ -208,7 +228,10 @@ int main(int argc, char **argv){
 				continue;
 		}
 
-		write_story(str);
+		// Write out the story. If this returns false, the file wasn't a story.
+		if(!write_story(str))
+			continue;
+
 		count++;
 
 		// Hard limit to the number of posts on a page.
