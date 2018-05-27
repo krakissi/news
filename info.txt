@@ -1,3 +1,4 @@
 # knet news module ... for making blog posts
 # mperron 2017
 cat=bin/cat_story
+nav=bin/nav_bar

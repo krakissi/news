@@ -3,12 +3,8 @@
 	mperron (2017)
 */
 
-#include <iostream>
 #include <fstream>
-#include <string>
 #include <list>
-#include <map>
-#include <regex>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,50 +13,9 @@
 
 #include <time.h>
 
-using namespace std;
-
-#define DIR_DB_BASE "db/"
-#define MAX_PAGE_COUNT 10
-#define DIR_DB_DEFAULT "s"
+#include "common.h"
 
 char dir_db[256] = DIR_DB_BASE DIR_DB_DEFAULT;
-
-// Prefix HDR_: headers used in the preamble of a story file.
-#define HDR_TITLE "title"
-
-// Prefix QRY_: Query string parameter names.
-#define QRY_START "a"
-#define QRY_END "b"
-#define QRY_COUNT "c"
-#define QRY_SINGLE "s"
-
-int error_code(int code, const char *msg, ...){
-	cerr << msg;
-
-	return code;
-}
-
-string format_time(string fname){
-	string result = "";
-
-	size_t n = 256;
-	char *s = (char*) calloc(n, sizeof(char));
-
-	long t;
-	try {
-		t = stol(fname);
-	} catch(...){
-		return fname;
-	}
-
-	struct tm *tm = localtime(&t);
-
-	strftime(s, n, "%x %T", tm);
-
-	result.append(s);
-	free(s);
-	return result;
-}
 
 bool write_story(string fname){
 	static regex regex_key("^\\s*([^\\s=]*)\\s*=\\s*(.*)$");
@@ -120,29 +75,6 @@ bool write_story(string fname){
 	return true;
 }
 
-void query_parse(map<string, string> &query){
-	static regex regex_query("([^&]+)");
-	static regex regex_splitter("^([^=]*)=(.*)$");
-
-	smatch sm;
-	char *str = getenv("QUERY_STRING");
-	if(!str)
-		return;
-	string str_search(str);
-
-	while(regex_search(str_search, sm, regex_query)){
-		string str_inner = sm[1];
-		smatch sm_inner;
-
-		if(regex_match(str_inner, sm_inner, regex_splitter))
-			query[sm_inner[1]] = sm_inner[2];
-		else
-			query[str_inner] = "";
-
-		str_search = sm.suffix();
-	}
-}
-
 int main(int argc, char **argv){
 	// First argument is an optional alternative DB directory.
 	if(argc >= 2){
@@ -152,10 +84,25 @@ int main(int argc, char **argv){
 
 	string dbdir = (dir_db);
 	DIR *dbs = opendir(dbdir.c_str());
-	string b;
+	if(!dbs)
+		return errorcode(1, "Could not open " DIR_DB_BASE "\n");
 
 	list<string> files;
 	map<string, string> query;
+
+	int count = 0;
+	struct dirent *entry;
+	while(entry = readdir(dbs)){
+		// Skip dot files
+		if(entry->d_name[0] == '.')
+			continue;
+
+		files.push_back(entry->d_name);
+	}
+	closedir(dbs);
+
+	files.sort();
+	files.reverse();
 
 	query_parse(query);
 
@@ -194,28 +141,9 @@ int main(int argc, char **argv){
 	} catch(...){
 	}
 
-	if(!dbs)
-		return error_code(1, "Could not open " DIR_DB_BASE "\n");
-
-	int count = 0;
-	struct dirent *entry;
-	while(entry = readdir(dbs)){
-		// Skip dot files
-		if(entry->d_name[0] == '.')
-			continue;
-
-		files.push_back(entry->d_name);
-	}
-	closedir(dbs);
-
-	files.sort();
-	files.reverse();
-
 	cout << endl;
 
 	for(auto str : files){
-
-
 		// If this is a single post lookup, skip files that don't match the name.
 		if(single_post && (post_id != str))
 			continue;
