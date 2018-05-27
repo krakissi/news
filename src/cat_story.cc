@@ -123,18 +123,18 @@ int main(int argc, char **argv){
 	int post_count;
 	bool hardstop = false;
 	try {
+		try {
+			post_count = stol(query.at(QRY_COUNT));
+		} catch(...){
+			post_count = MAX_PAGE_COUNT;
+		}
+
 		post_id_start = query.at(QRY_START);
 
 		try {
 			post_id_stop = query.at(QRY_END);
 			hardstop = true;
 		} catch(...){
-		}
-
-		try {
-			post_count = stol(query.at(QRY_COUNT));
-		} catch(...){
-			post_count = MAX_PAGE_COUNT;
 		}
 
 		bounded_posts = true;
@@ -163,15 +163,12 @@ int main(int argc, char **argv){
 		count++;
 
 		// Hard limit to the number of posts on a page.
-		if(count >= MAX_PAGE_COUNT)
+		if(count >= post_count)
 			break;
 
 		// Stop processing, we're at the boundary.
 		if(bounded_posts && bounded_in){
 			if(hardstop && (post_id_stop == str))
-				break;
-
-			if(count >= post_count)
 				break;
 		}
 	}

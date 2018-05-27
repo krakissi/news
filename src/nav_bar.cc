@@ -4,6 +4,7 @@
 */
 
 #include <list>
+#include <vector>
 
 #include <sys/stat.h>
 #include <dirent.h>
@@ -78,6 +79,12 @@ int main(int argc, char **argv){
 	int post_count;
 	bool hardstop = false;
 	try {
+		try {
+			post_count = stol(query.at(QRY_COUNT));
+		} catch(...){
+			post_count = MAX_PAGE_COUNT;
+		}
+
 		post_id_start = query.at(QRY_START);
 
 		try {
@@ -86,14 +93,9 @@ int main(int argc, char **argv){
 		} catch(...){
 		}
 
-		try {
-			post_count = stol(query.at(QRY_COUNT));
-		} catch(...){
-			post_count = MAX_PAGE_COUNT;
-		}
-
 		bounded_posts = true;
 	} catch(...){
+		bounded_in = true;
 	}
 
 	cout << endl;
@@ -101,66 +103,98 @@ int main(int argc, char **argv){
 	if(hardstop){
 		// Showing a specific date range. Nothing to do in this mode.
 	} else {
-		string id_newest = "", id_newer = "", id_older = "", id_oldest = "";
 		bool found_single = false;
+		vector<string> posts;
+		int index_first = 0, index_last = -1, c = 0;
 
 		for(auto str : files){
 			// Skip files that aren't stories.
 			if(!is_story(str))
 				continue;
 
-			// Set the newest file to the first one that we see.
-			if(id_newest == "")
-				id_newest = str;
-
-			// If this is a single post lookup, skip files that don't match the name.
 			if(single_post){
+				// Find the index of the story we're displaying.
 				if(post_id == str)
-					found_single = true;
-				else {
-					if(!found_single)
-						id_newer = str;
-					else if(id_older == "")
-						id_older = str;
-
-					id_oldest = str;
+					index_first = c;
+			} else if(bounded_posts){
+				// Find the index of the first story on the page.
+				if(post_id_start == str){
+					bounded_in = true;
+					index_first = c;
 				}
-			} else {
-				// TODO
-				/*
-				// If this is a range post lookup, skip until we're in-bounds.
-				if(bounded_posts && !bounded_in){
-					if(post_id_start == str)
-						bounded_in = true;
-					else
-						continue;
+			}
+
+			posts.push_back(str);
+			c++;
+
+			if(bounded_in){
+				// Find the index of the last story on the page.
+				if((c - index_first) == post_count){
+					bounded_in = false;
+					index_last = (c - 1);
 				}
-
-				count++;
-
-				// Hard limit to the number of posts on a page.
-				if(count >= MAX_PAGE_COUNT)
-					break;
-
-				// Stop processing, we're at the boundary.
-				if(bounded_posts && bounded_in){
-					if(hardstop && (post_id_stop == str))
-						break;
-
-					if(count >= post_count)
-						break;
-				}
-				*/
 			}
 		}
 
+		cout << "<div class=page_nav>" << endl;
+
 		if(single_post){
-			// Write out story newest/newer/older/oldest controls
-			// TODO
+			string id_newest = "", id_newer = "", id_older = "", id_oldest = "";
+
+			// Newest link
+			if(index_first > 0){
+				id_newest = posts[0];
+
+				cout << "\t<span class=page_newest><a href=\"?s=" << id_newest << "\">newest</a></span>" << endl;
+			}
+
+			// Newer link
+			if(index_first > 1){
+				id_newer = posts[(index_first - 1)];
+
+				cout << "\t<span class=page_newer><a href=\"?s=" << id_newer << "\">newer</a></span>" << endl;
+			}
+
+			// Older link
+			if(index_first < (c - 2)){
+				id_older = posts[(index_first + 1)];
+
+				cout <<"\t<span class=page_older><a href=\"?s=" << id_older << "\">older</a></span>" << endl;
+			}
+
+			// Oldest link
+			if(index_first < (c - 1)){
+				id_oldest = posts[(c - 1)];
+
+				cout <<"\t<span class=page_oldest><a href=\"?s=" << id_oldest << "\">oldest</a></span>" << endl;
+			}
 		} else {
-			// Write out page change controls
-			// TODO
+			string id_newer = "", id_older = "";
+
+			// Newer link
+			if(index_first > 0){
+				id_newer = posts[((index_first >= post_count) ? (index_first - post_count) : 0)];
+
+				// Write out the link
+				cout << "\t<span class=page_newer><a href=\"?a=" << id_newer;
+				if(post_count != MAX_PAGE_COUNT)
+					cout << "&c=" << post_count;
+				cout << "\">newer</a></span>" << endl;
+			}
+
+			// Older link
+			if((index_last > 0) && (index_last < (c - 1))){
+				id_older = posts[(index_last + 1)];
+
+				// Write out the link.
+				cout << "\t<span class=page_older><a href=\"?a=" << id_older;
+				if(post_count != MAX_PAGE_COUNT)
+					cout << "&c=" << post_count;
+				cout << "\">older</a></span>" << endl;
+			}
 		}
+
+		cout << "</div>" << endl;
 	}
 
 	return 0;
