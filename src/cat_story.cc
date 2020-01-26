@@ -57,7 +57,7 @@ bool write_story(string fname){
 
 	// Write out the story.
 	cout << "<!-- " << fname << ": " << time << " -->" << endl;
-	cout << "<article class=story>" << endl;
+	cout << "<article class=\"story story_id_" << fname << "\">" << endl;
 
 	try {
 		cout << "<header><h2><a href=\"?s=" << fname << "\">" << headers.at(HDR_TITLE) << "</a></h2></header>" << endl;
