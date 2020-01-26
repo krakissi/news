@@ -1,4 +1,4 @@
-all: db bin bin/common bin/cat_story bin/nav_bar
+all: db bin bin/common bin/cat_story bin/nav_bar bin/search
 
 clean:
 	rm -r bin
@@ -10,6 +10,9 @@ db:
 
 bin:
 	mkdir bin
+
+bin/search: src/search.cc
+	$(GCC) -o bin/search src/search.cc bin/common
 
 bin/cat_story: src/cat_story.cc
 	$(GCC) -o bin/cat_story src/cat_story.cc bin/common

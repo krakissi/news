@@ -17,12 +17,17 @@
 // Prefix HDR_: headers used in the preamble of a story file.
 #define HDR_TITLE "title"
 
+// Prefix REG_: regular expressions
+#define REG_KEY "^\\s*([^\\s=]*)\\s*=\\s*(.*)$"
+#define REG_QUERY_PRE "^.*"
+#define REG_QUERY_POST ".*$"
 
 // Prefix QRY_: Query string parameter names.
 #define QRY_START "a"
 #define QRY_END "b"
 #define QRY_COUNT "c"
 #define QRY_SINGLE "s"
+#define QRY_SEARCH "q"
 
 using namespace std;
 

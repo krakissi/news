@@ -18,7 +18,7 @@
 char dir_db[256] = DIR_DB_BASE DIR_DB_DEFAULT;
 
 bool write_story(string fname){
-	static regex regex_key("^\\s*([^\\s=]*)\\s*=\\s*(.*)$");
+	static regex regex_key(REG_KEY);
 	smatch sm;
 	map<string, string> headers;
 
@@ -57,11 +57,10 @@ bool write_story(string fname){
 
 	// Write out the story.
 	cout << "<!-- " << fname << ": " << time << " -->" << endl;
-	cout << "<div class=story>" << endl;
-	cout << "<span class=dateline>" << time << "</span>" <<endl;
+	cout << "<article class=story>" << endl;
 
 	try {
-		cout << "<h2><a href=\"?s=" << fname << "\">" << headers.at(HDR_TITLE) << "</a></h2>" << endl;
+		cout << "<header><h2><a href=\"?s=" << fname << "\">" << headers.at(HDR_TITLE) << "</a></h2></header>" << endl;
 	} catch(...){
 		cout << "<!-- untitled -->" << endl;
 	}
@@ -70,7 +69,9 @@ bool write_story(string fname){
 		getline(in, buffer);
 		cout << "\t" <<  buffer << endl;
 	}
-	cout << "</div>" << endl;
+
+	cout << "<footer><span class=dateline><time>" << time << "</time></span></footer>" <<endl;
+	cout << "</article>" << endl;
 
 	return true;
 }
