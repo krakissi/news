@@ -3,3 +3,6 @@
 cat=bin/cat_story
 nav=bin/nav_bar
 search=bin/search
+
+# Prints "&night" if it's evening/night
+night=bin/night
