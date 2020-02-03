@@ -3,5 +3,7 @@
 # After 7pm but before 8am
 hour=$(date +%H)
 if [ "$hour" -gt 18 ] || [ "$hour" -lt 8 ]; then
-	echo -en "&night"
+	echo -en "night"
+else
+	echo -en "day"
 fi
