@@ -17,7 +17,7 @@
 
 char dir_db[256] = DIR_DB_BASE DIR_DB_DEFAULT;
 
-bool write_story(string fname){
+bool write_story(string fname, bool single_post){
 	static regex regex_key(REG_KEY);
 	smatch sm;
 	map<string, string> headers;
@@ -53,6 +53,15 @@ bool write_story(string fname){
 
 		if(regex_match(buffer, sm, regex_key))
 			headers[sm[1]] = sm[2];
+	}
+
+	// If this is not a "single post" and the story is set to hidden, skip it.
+	if(!single_post){
+		try {
+			if(headers.at(HDR_HIDDEN) == "true")
+				return false;
+		} catch(...){
+		}
 	}
 
 	// Write out the story.
@@ -158,7 +167,7 @@ int main(int argc, char **argv){
 		}
 
 		// Write out the story. If this returns false, the file wasn't a story.
-		if(!write_story(str))
+		if(!write_story(str, single_post))
 			continue;
 
 		count++;

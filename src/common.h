@@ -16,6 +16,7 @@
 
 // Prefix HDR_: headers used in the preamble of a story file.
 #define HDR_TITLE "title"
+#define HDR_HIDDEN "hidden"
 
 // Prefix REG_: regular expressions
 #define REG_KEY "^\\s*([^\\s=]*)\\s*=\\s*(.*)$"
