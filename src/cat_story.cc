@@ -76,6 +76,14 @@ bool write_story(string fname, bool single_post){
 
 	while(in.good()){
 		getline(in, buffer);
+
+		// Story break. If we're in a single post, stop here and link to the
+		// story. Otherwise continue.
+		if(!single_post && (buffer == "!!!!")){
+			cout << "<span class=pagebreak_link><a href=\"?s=" << fname << "\">Read More...</a></span>" << endl;
+			break;
+		}
+
 		cout << "\t" <<  buffer << endl;
 	}
 
