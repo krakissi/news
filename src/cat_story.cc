@@ -83,7 +83,7 @@ bool write_story(string fname, bool single_post){
 			if(single_post)
 				continue;
 
-			cout << "<span class=pagebreak_link><a href=\"?s=" << fname << "\">Read More...</a></span>" << endl;
+			cout << "<div class=pagebreak_link><a href=\"?s=" << fname << "\">Read More...</a></div>" << endl;
 			break;
 		}
 
