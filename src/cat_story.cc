@@ -81,9 +81,10 @@ bool write_story(string fname, bool single_post){
 		// story. Otherwise continue.
 		if(buffer == "!!!!"){
 			if(single_post)
-				continue;
+				cout << "<a name=pagebreak></a>" << endl;
+			else
+				cout << "<div class=pagebreak_link><a href=\"?s=" << fname << "#pagebreak\">Read More...</a></div>" << endl;
 
-			cout << "<div class=pagebreak_link><a href=\"?s=" << fname << "\">Read More...</a></div>" << endl;
 			break;
 		}
 
