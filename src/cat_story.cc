@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <list>
+#include <cstdlib>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,12 +18,13 @@
 
 char dir_db[256] = DIR_DB_BASE DIR_DB_DEFAULT;
 
-bool write_story(string fname, bool single_post){
+bool write_story(string fname, bool single_post, const char *exec_header, const char *exec_footer){
 	static regex regex_key(REG_KEY);
 	smatch sm;
 	map<string, string> headers;
 
 	string path = dir_db + ("/" + fname);
+	setenv("knetnews_postid", fname.c_str(), 1);
 
 	// Determine whether this is a valid story file.
 	{
@@ -68,6 +70,10 @@ bool write_story(string fname, bool single_post){
 	cout << "<!-- " << fname << ": " << time << " -->" << endl;
 	cout << "<article class=\"story story_id_" << fname << "\">" << endl;
 
+	// Write out the header if present.
+	if(exec_header)
+		system(exec_header);
+
 	try {
 		cout << "<header><h2><a href=\"?s=" << fname << "\">" << headers.at(HDR_TITLE) << "</a></h2></header>" << endl;
 	} catch(...){
@@ -93,6 +99,11 @@ bool write_story(string fname, bool single_post){
 	}
 
 	cout << "<footer><span class=dateline><time>" << time << "</time></span></footer>" <<endl;
+
+	// Write out the footer if present.
+	if(exec_footer)
+		system(exec_footer);
+
 	cout << "</article>" << endl;
 
 	return true;
@@ -164,6 +175,51 @@ int main(int argc, char **argv){
 	} catch(...){
 	}
 
+	// Check for header and footer scripts. These get appended immediately
+	// inside of the <article> tags.
+	bool has_header;
+	bool has_footer;
+	string exec_header;
+	string exec_footer;
+	{
+		struct stat sb;
+		exec_footer = (dbdir + ".footer");
+
+		if(
+			// File exists and we have access to it.
+			!stat(exec_footer.c_str(), &sb) &&
+
+			// File is not a directory.
+			!S_ISDIR(sb.st_mode) &&
+
+			// File is executable.
+			(sb.st_mode & (S_IXOTH | S_IXUSR | S_IXGRP))
+		){
+			has_footer = true;
+		} else {
+			has_footer = false;
+			exec_footer = "";
+		}
+
+		exec_header = (dbdir + ".header");
+
+		if(
+			// File exists and we have access to it.
+			!stat(exec_header.c_str(), &sb) &&
+
+			// File is not a directory.
+			!S_ISDIR(sb.st_mode) &&
+
+			// File is executable.
+			(sb.st_mode & (S_IXOTH | S_IXUSR | S_IXGRP))
+		){
+			has_header = true;
+		} else {
+			has_header = false;
+			exec_header = "";
+		}
+	}
+
 	cout << endl;
 
 	for(auto str : files){
@@ -179,8 +235,12 @@ int main(int argc, char **argv){
 				continue;
 		}
 
-		// Write out the story. If this returns false, the file wasn't a story.
-		if(!write_story(str, single_post))
+		// Write out the story. If this returns false, the file wasn't a story (or is deliberately hidden).
+		if(!write_story(
+			str, single_post,
+			(has_header ? exec_header.c_str() : NULL),
+			(has_footer ? exec_footer.c_str() : NULL)
+		))
 			continue;
 
 		count++;
