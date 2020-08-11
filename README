@@ -1,0 +1,94 @@
+Kraknet News
+------------
+
+This is a Kraknet module for news or blogposting, with support for an
+unlimited number of separate databases with unique names.
+
+--
+
+To install, clone this repository into the mods/ directory of your
+Kraknet web server (https://github.com/krakissi/kraknet), then build the
+tools by invoking `make`.
+
+A db/ directory will be created automatically. This is where all stories
+are stored. The default database is simply db/s/.
+
+--
+
+To create a new post, make a new text file in the appropriate database
+directory. The name of the file should be the Unix time in seconds that
+the post should appear to have been created. You can get the current
+time by invoking `date +%s`.
+
+The post has a header section and a body section, separated by an empty
+line. For example:
+
+[file named 1597124603]
+title = My Breaking News Story
+
+<div>
+  <p>
+    ... critical information ...
+  </p>
+</div>
+
+[end of file]
+
+Possible header values are:
+  title: The title which will appear on your story post. This is
+  required.
+
+  hidden: If true, the post will only be accessible by its URL.
+
+You can insert one line with four exclamation marks anywhere in the body
+of a story post to create a page break. Content before the break will
+appear if the story is shown in a list of stories. Content after the
+break will appear only if the story is being displayed by itself
+(through the direct link to that particular story). If the story has a
+page break, a "Read More..." link will be shown.
+
+For example:
+
+<div>
+  <p>
+    ... something teasing the story ...
+  </p>
+</div>
+!!!!
+<div>
+  <p>
+    ... the main story, after clicking "Read More..."
+  </p>
+</div>
+
+--
+
+Scripts in this module:
+  news:cat [db_name]
+	- Renders news stories. If there is a s= parameter in the query
+	  string, it will render the story matching the specified time.
+	  Otherwise, a selection of stories in reverse chronological order
+	  are shown. Optionally specify a database name. For example, if
+	  your stories are in db/my_news you would invoke
+	  `<????news:cat my_news>`.
+
+  news:nav [db_name]
+	- Renders navigation links to move to older or newer posts.
+	  Optionally specify a database name, as described in news:cat.
+
+--
+
+Example Kraknet HTML page showing news from the default database.
+
+<html>
+  <head>
+    <title>News</title>
+  </head>
+  <body>
+    <!-- Render news stories -->
+    <????news:cat>
+
+	<!-- Render navigation links (older, newer, etc.) -->
+	<????new:nav>
+  </body>
+</html>
