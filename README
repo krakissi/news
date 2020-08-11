@@ -65,16 +65,16 @@ For example:
 
 Scripts in this module:
   news:cat [db_name]
-	- Renders news stories. If there is a s= parameter in the query
-	  string, it will render the story matching the specified time.
-	  Otherwise, a selection of stories in reverse chronological order
-	  are shown. Optionally specify a database name. For example, if
-	  your stories are in db/my_news you would invoke
-	  `<????news:cat my_news>`.
+    - Renders news stories. If there is a s= parameter in the query
+      string, it will render the story matching the specified time.
+      Otherwise, a selection of stories in reverse chronological order
+      are shown. Optionally specify a database name. For example, if
+      your stories are in db/my_news you would invoke
+      `<????news:cat my_news>`.
 
   news:nav [db_name]
-	- Renders navigation links to move to older or newer posts.
-	  Optionally specify a database name, as described in news:cat.
+    - Renders navigation links to move to older or newer posts.
+      Optionally specify a database name, as described in news:cat.
 
 --
 
@@ -88,7 +88,7 @@ Example Kraknet HTML page showing news from the default database.
     <!-- Render news stories -->
     <????news:cat>
 
-	<!-- Render navigation links (older, newer, etc.) -->
-	<????new:nav>
+    <!-- Render navigation links (older, newer, etc.) -->
+    <????new:nav>
   </body>
 </html>
